@@ -301,17 +301,20 @@ static void intel_workarounds(struct cpuinfo_x86 *c)
 static void srat_detect_node(struct cpuinfo_x86 *c)
 {
 #ifdef CONFIG_NUMA
-	unsigned node;
 	int cpu = smp_processor_id();
+	unsigned node = numa_cpu_node(cpu);
 
 	/* Don't do the funky fallback heuristics the AMD version employs
 	   for now. */
-	node = numa_cpu_node(cpu);
-	if (!node_has_memory(node)) {
+	if (node == NUMA_NO_NODE || !node_online(node)) {
 		/* reuse the value from init_cpu_to_node() */
 		node = cpu_to_node(cpu);
 	}
 	numa_set_node(cpu, node);
+
+	if (!node_has_memory(node))
+		node = find_fallback_mem_node(node);
+	set_cpu_numa_mem(cpu, node);
 #endif
 }
 

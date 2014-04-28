@@ -258,6 +258,10 @@ void __init setup_per_cpu_areas(void)
 		 * So set them all (boot cpu and all APs).
 		 */
 		set_cpu_numa_node(cpu, early_cpu_to_node(cpu));
+#ifdef CONFIG_HAVE_MEMORYLESS_NODES
+		set_cpu_numa_mem(cpu,
+				 early_per_cpu_map(x86_cpu_to_mem_map, cpu));
+#endif
 #endif
 		/*
 		 * Up to this point, the boot CPU has been using .init.data
@@ -277,6 +281,9 @@ void __init setup_per_cpu_areas(void)
 #endif
 #ifdef CONFIG_NUMA
 	early_per_cpu_ptr(x86_cpu_to_node_map) = NULL;
+#ifdef CONFIG_HAVE_MEMORYLESS_NODES
+	early_per_cpu_ptr(x86_cpu_to_mem_map) = NULL;
+#endif
 #endif
 
 	/* Setup node to cpumask map */

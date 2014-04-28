@@ -399,7 +399,7 @@ static void srat_detect_node(struct cpuinfo_x86 *c)
 	if (x86_cpuinit.fixup_cpu_id)
 		x86_cpuinit.fixup_cpu_id(c, node);
 
-	if (!node_has_memory(node)) {
+	if (node == NUMA_NO_NODE || !node_online(node)) {
 		/*
 		 * Two possibilities here:
 		 *
@@ -425,10 +425,14 @@ static void srat_detect_node(struct cpuinfo_x86 *c)
 		    __apicid_to_node[ht_nodeid] != NUMA_NO_NODE)
 			node = __apicid_to_node[ht_nodeid];
 		/* Pick a nearby node with memory */
-		if (!node_has_memory(node))
+		if (node == NUMA_NO_NODE || !node_online(node))
 			node = find_mem_node_for_cpu(apicid);
 	}
 	numa_set_node(cpu, node);
+
+	if (!node_has_memory(node))
+		node = find_mem_node_for_cpu(apicid);
+	set_cpu_numa_mem(cpu, node);
 #endif
 }
 

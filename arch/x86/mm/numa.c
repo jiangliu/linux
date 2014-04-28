@@ -23,6 +23,9 @@
 int __initdata numa_off;
 nodemask_t numa_nodes_parsed __initdata;
 
+/* Mask for empty nodes without memory and CPU */
+static nodemask_t numa_empty_nodes_map __initdata;
+
 struct pglist_data *node_data[MAX_NUMNODES] __read_mostly;
 EXPORT_SYMBOL(node_data);
 
@@ -77,6 +80,24 @@ EXPORT_SYMBOL(node_to_cpumask_map);
  */
 DEFINE_EARLY_PER_CPU(int, x86_cpu_to_node_map, NUMA_NO_NODE);
 EXPORT_EARLY_PER_CPU_SYMBOL(x86_cpu_to_node_map);
+
+#ifdef CONFIG_HAVE_MEMORYLESS_NODES
+DEFINE_EARLY_PER_CPU(int, x86_cpu_to_mem_map, NUMA_NO_NODE);
+
+static inline void early_set_cpu_to_mem(int cpu, int node)
+{
+	early_per_cpu_map(x86_cpu_to_mem_map, cpu) = node;
+}
+
+void __set_cpu_numa_mem(int cpu, int node)
+{
+	per_cpu(_numa_mem_, cpu) = node;
+	_node_numa_mem_[early_cpu_to_node(cpu)] = node;
+}
+EXPORT_SYMBOL_GPL(__set_cpu_numa_mem);
+#else /* CONFIG_HAVE_MEMORYLESS_NODES */
+static inline void early_set_cpu_to_mem(int cpu, int node) {}
+#endif /* CONFIG_HAVE_MEMORYLESS_NODES */
 
 void numa_set_node(int cpu, int node)
 {
@@ -562,22 +583,37 @@ static int __init numa_register_memblks(struct numa_meminfo *mi)
 			end = max(mi->blk[i].end, end);
 		}
 
-		if (start >= end)
-			continue;
-
 		/*
 		 * Don't confuse VM with a node that doesn't have the
 		 * minimum amount of memory:
 		 */
-		if (end && (end - start) < NODE_MIN_SIZE)
-			continue;
-
-		alloc_node_data(nid);
+		if (start < end && (end - start) >= NODE_MIN_SIZE) {
+			alloc_node_data(nid);
+		} else if (IS_ENABLED(CONFIG_HAVE_MEMORYLESS_NODES)) {
+			/*
+			 * First assume nodes without memory as empty,
+			 * we will clear the empty flag for nodes with CPUs
+			 * later in function init_cpu_to_node().
+			 */
+			node_set(nid, numa_empty_nodes_map);
+			alloc_node_data(nid);
+		}
 	}
 
 	/* Dump memblock with node info and return. */
 	memblock_dump_all();
 	return 0;
+}
+
+static int __init find_mem_node_for_node(int nid)
+{
+	while (node_isset(nid, numa_empty_nodes_map)) {
+		nid = next_node(nid, node_online_map);
+		if (nid == MAX_NUMNODES)
+			nid = first_node(node_online_map);
+	}
+
+	return nid;
 }
 
 /*
@@ -589,16 +625,28 @@ static int __init numa_register_memblks(struct numa_meminfo *mi)
  */
 static void __init numa_init_array(void)
 {
-	int rr, i;
+	int rr, nid, i;
 
 	rr = first_node(node_online_map);
 	for (i = 0; i < nr_cpu_ids; i++) {
-		if (early_cpu_to_node(i) != NUMA_NO_NODE)
-			continue;
-		numa_set_node(i, rr);
-		rr = next_node(rr, node_online_map);
-		if (rr == MAX_NUMNODES)
-			rr = first_node(node_online_map);
+		nid = numa_cpu_node(i);
+		if (nid == NUMA_NO_NODE) {
+			/*
+			 * Mapping non-existing CPUs to nodes with memory,
+			 * otherwise code pattern as below will fail:
+			 * 	for_each_possible_cpu(cpu)
+			 *		mem_alloc_api(cpu_to_node(cpu))
+			 */
+			rr = find_mem_node_for_node(rr);
+			numa_set_node(i, rr);
+			early_set_cpu_to_mem(i, rr);
+			rr = next_node(rr, node_online_map);
+			if (rr == MAX_NUMNODES)
+				rr = first_node(node_online_map);
+		} else {
+			/* Setup memory node for existing CPUs */
+			early_set_cpu_to_mem(i, find_mem_node_for_node(nid));
+		}
 	}
 }
 
@@ -741,13 +789,35 @@ void __init init_cpu_to_node(void)
 
 	BUG_ON(early_per_cpu_ptr(x86_cpu_to_apicid) == NULL);
 	for_each_possible_cpu(cpu) {
-		int node = numa_cpu_node(cpu);
+		int node = numa_cpu_node(cpu), memnode;
 
 		if (node == NUMA_NO_NODE)
 			continue;
+
 		if (!node_has_memory(node))
-			node = find_fallback_mem_node(node);
-		numa_set_node(cpu, node);
+			memnode = find_fallback_mem_node(node);
+		else
+			memnode = node;
+		if (IS_ENABLED(CONFIG_HAVE_MEMORYLESS_NODES)) {
+			/* Clear empty flag for nodes with CPUs */
+			node_clear(node, numa_empty_nodes_map);
+			numa_set_node(cpu, node);
+			early_set_cpu_to_mem(cpu, memnode);
+		} else {
+			numa_set_node(cpu, memnode);
+		}
+	}
+
+	/* Destroy pgdat for empty nodes without CPU and memory */
+	if (IS_ENABLED(CONFIG_HAVE_MEMORYLESS_NODES)) {
+		int nid;
+		const size_t nd_size = roundup(sizeof(pg_data_t), PAGE_SIZE);
+
+		for_each_node_mask(nid, numa_empty_nodes_map) {
+			node_set_offline(nid);
+			memblock_free(__pa(node_data[nid]), nd_size);
+			node_data[nid] = NULL;
+		}
 	}
 }
 

@@ -49,6 +49,12 @@
 
 /* Mappings between logical cpu number and node number */
 DECLARE_EARLY_PER_CPU(int, x86_cpu_to_node_map);
+#ifdef CONFIG_HAVE_MEMORYLESS_NODES
+DECLARE_EARLY_PER_CPU(int, x86_cpu_to_mem_map);
+
+extern void __set_cpu_numa_mem(int cpu, int node);
+#define set_cpu_numa_mem __set_cpu_numa_mem
+#endif
 
 #ifdef CONFIG_DEBUG_PER_CPU_MAPS
 /*
