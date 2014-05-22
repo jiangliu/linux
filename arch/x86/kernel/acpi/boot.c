@@ -76,6 +76,19 @@ int acpi_fix_pin2_polarity __initdata;
 static u64 acpi_lapic_addr __initdata = APIC_DEFAULT_PHYS_BASE;
 #endif
 
+/*
+ * Locks related to IOAPIC hotplug
+ * Hotplug side:
+ * 	->lock_device_hotplug()	//device_hotplug_lock
+ *		->acpi_ioapic_rwsem
+ *			->ioapic_lock
+ * Interrupt mapping side:
+ *	->acpi_ioapic_rwsem
+ *		->ioapic_mutex
+ *			->ioapic_lock
+ */
+static DECLARE_RWSEM(acpi_ioapic_rwsem);
+
 /* --------------------------------------------------------------------------
                               Boot-time Configuration
    -------------------------------------------------------------------------- */
@@ -609,8 +622,10 @@ int acpi_gsi_to_irq(u32 gsi, unsigned int *irqp)
 	if (acpi_irq_model == ACPI_IRQ_MODEL_PIC) {
 		*irqp = gsi;
 	} else {
+		down_read(&acpi_ioapic_rwsem);
 		irq = mp_map_gsi_to_irq(gsi,
 					IOAPIC_MAP_ALLOC | IOAPIC_MAP_CHECK);
+		up_read(&acpi_ioapic_rwsem);
 		if (irq < 0)
 			return -1;
 		*irqp = irq;
@@ -651,7 +666,9 @@ static int acpi_register_gsi_ioapic(struct device *dev, u32 gsi,
 	int irq = gsi;
 
 #ifdef CONFIG_X86_IO_APIC
+	down_read(&acpi_ioapic_rwsem);
 	irq = mp_register_gsi(dev, gsi, trigger, polarity);
+	up_read(&acpi_ioapic_rwsem);
 #endif
 
 	return irq;
@@ -660,7 +677,9 @@ static int acpi_register_gsi_ioapic(struct device *dev, u32 gsi,
 static void acpi_unregister_gsi_ioapic(u32 gsi)
 {
 #ifdef CONFIG_X86_IO_APIC
+	down_read(&acpi_ioapic_rwsem);
 	mp_unregister_gsi(gsi);
+	up_read(&acpi_ioapic_rwsem);
 #endif
 }
 
@@ -1186,7 +1205,9 @@ static void __init acpi_process_madt(void)
 			/*
 			 * Parse MADT IO-APIC entries
 			 */
+			down_write(&acpi_ioapic_rwsem);
 			error = acpi_parse_madt_ioapic_entries();
+			up_write(&acpi_ioapic_rwsem);
 			if (!error) {
 				acpi_set_irq_model_ioapic();
 
