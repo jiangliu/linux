@@ -52,7 +52,7 @@ static int alloc_masks(struct irq_desc *desc, gfp_t gfp, int node)
 
 static void desc_smp_init(struct irq_desc *desc, int node)
 {
-	desc->irq_data.node = node;
+	desc->irq_common_data.node = node;
 	cpumask_copy(desc->irq_data.affinity, irq_default_affinity);
 #ifdef CONFIG_GENERIC_PENDING_IRQ
 	cpumask_clear(desc->pending_mask);
@@ -61,7 +61,7 @@ static void desc_smp_init(struct irq_desc *desc, int node)
 
 static inline int desc_node(struct irq_desc *desc)
 {
-	return desc->irq_data.node;
+	return desc->irq_common_data.node;
 }
 
 #else

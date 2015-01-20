@@ -244,7 +244,7 @@ static int irq_node_proc_show(struct seq_file *m, void *v)
 {
 	struct irq_desc *desc = irq_to_desc((long) m->private);
 
-	seq_printf(m, "%d\n", desc->irq_data.node);
+	seq_printf(m, "%d\n", desc->irq_common_data.node);
 	return 0;
 }
 

@@ -128,9 +128,11 @@ struct irq_domain;
  * struct irq_data - per irq data shared by all irqchips
  * @state_use_accessors: status information for irq chip functions.
  *			Use accessor functions to deal with it
+ * @node:		node index useful for balancing
  */
 struct irq_common_data {
 	unsigned int		state_use_accessors;
+	unsigned int		node;
 };
 
 /**
@@ -138,7 +140,6 @@ struct irq_common_data {
  * @mask:		precomputed bitmask for accessing the chip registers
  * @irq:		interrupt number
  * @hwirq:		hardware interrupt number, local to the interrupt domain
- * @node:		node index useful for balancing
  * @chip:		low level interrupt hardware access
  * @domain:		Interrupt translation domain; responsible for mapping
  *			between hwirq number and linux irq number.
@@ -158,7 +159,6 @@ struct irq_data {
 	u32			mask;
 	unsigned int		irq;
 	unsigned long		hwirq;
-	unsigned int		node;
 	struct irq_common_data	*common;
 	struct irq_chip		*chip;
 	struct irq_domain	*domain;
