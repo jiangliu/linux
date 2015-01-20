@@ -47,6 +47,7 @@ struct pt_regs;
  * @name:		flow handler name for /proc/interrupts output
  */
 struct irq_desc {
+	struct irq_common_data	irq_common_data;
 	struct irq_data		irq_data;
 	unsigned int __percpu	*kstat_irqs;
 	irq_flow_handler_t	handle_irq;
