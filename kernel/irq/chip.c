@@ -83,7 +83,7 @@ int irq_set_handler_data(unsigned int irq, void *data)
 
 	if (!desc)
 		return -EINVAL;
-	desc->irq_data.handler_data = data;
+	desc->irq_common_data.handler_data = data;
 	irq_put_desc_unlock(desc, flags);
 	return 0;
 }
