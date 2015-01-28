@@ -71,7 +71,7 @@ struct platform_device *acpi_create_platform_device(struct acpi_device *adev)
 		}
 		count = 0;
 		list_for_each_entry(rentry, &resource_list, node)
-			resources[count++] = rentry->res;
+			resources[count++] = *rentry->res;
 
 		acpi_dev_free_resource_list(&resource_list);
 	}
