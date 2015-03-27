@@ -52,6 +52,30 @@ static inline acpi_handle acpi_pci_get_bridge_handle(struct pci_bus *pbus)
 	return ACPI_HANDLE(dev);
 }
 
+struct acpi_pci_root;
+struct acpi_pci_root_ops;
+
+struct acpi_pci_root_info_common {
+	struct pci_controller		controller;
+	struct acpi_pci_root		*root;
+	struct acpi_device		*bridge;
+	struct acpi_pci_root_ops	*ops;
+	struct list_head		resources;
+	char				name[16];
+};
+
+struct acpi_pci_root_ops {
+	struct pci_ops *pci_ops;
+	int (*init_info)(struct acpi_pci_root_info_common *info);
+	void (*release_info)(struct acpi_pci_root_info_common *info);
+	int (*prepare_resources)(struct acpi_pci_root_info_common *info,
+				 int status);
+};
+
+extern struct pci_bus *acpi_pci_root_create(struct acpi_pci_root *root,
+					    struct acpi_pci_root_ops *ops,
+					    size_t extra_size);
+
 void acpi_pci_add_bus(struct pci_bus *bus);
 void acpi_pci_remove_bus(struct pci_bus *bus);
 
