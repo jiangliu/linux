@@ -10,7 +10,7 @@
 struct pci_root_info {
 	struct acpi_device *bridge;
 	char name[16];
-	struct pci_sysdata sd;
+	struct pci_controller sd;
 #ifdef	CONFIG_PCI_MMCONFIG
 	bool mcfg_added;
 	u16 segment;
@@ -384,7 +384,7 @@ struct pci_bus *pci_acpi_scan_root(struct acpi_pci_root *root)
 	LIST_HEAD(crs_res);
 	LIST_HEAD(resources);
 	struct pci_bus *bus;
-	struct pci_sysdata *sd;
+	struct pci_controller *sd;
 	int node;
 
 	if (pci_ignore_seg)
@@ -416,7 +416,7 @@ struct pci_bus *pci_acpi_scan_root(struct acpi_pci_root *root)
 	}
 
 	sd = &info->sd;
-	sd->domain = domain;
+	sd->segment = domain;
 	sd->node = node;
 	sd->companion = device;
 
@@ -482,7 +482,7 @@ struct pci_bus *pci_acpi_scan_root(struct acpi_pci_root *root)
 
 int pcibios_root_bridge_prepare(struct pci_host_bridge *bridge)
 {
-	struct pci_sysdata *sd = bridge->bus->sysdata;
+	struct pci_controller *sd = bridge->bus->sysdata;
 
 	ACPI_COMPANION_SET(&bridge->dev, sd->companion);
 	return 0;

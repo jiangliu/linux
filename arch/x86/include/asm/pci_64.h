@@ -6,13 +6,13 @@
 #ifdef CONFIG_CALGARY_IOMMU
 static inline void *pci_iommu(struct pci_bus *bus)
 {
-	struct pci_sysdata *sd = bus->sysdata;
+	struct pci_controller *sd = bus->sysdata;
 	return sd->iommu;
 }
 
 static inline void set_pci_iommu(struct pci_bus *bus, void *val)
 {
-	struct pci_sysdata *sd = bus->sysdata;
+	struct pci_controller *sd = bus->sysdata;
 	sd->iommu = val;
 }
 #endif /* CONFIG_CALGARY_IOMMU */

@@ -11,15 +11,15 @@
 
 #ifdef __KERNEL__
 
-struct pci_sysdata {
-	int		domain;		/* PCI domain */
-	int		node;		/* NUMA node */
+struct pci_controller {
 #ifdef CONFIG_ACPI
 	struct acpi_device *companion;	/* ACPI companion device */
 #endif
 #ifdef CONFIG_X86_64
 	void		*iommu;		/* IOMMU private data */
 #endif
+	int		segment;	/* PCI domain */
+	int		node;		/* NUMA node */
 };
 
 extern int pci_routeirq;
@@ -31,8 +31,9 @@ extern int noioapicreroute;
 #ifdef CONFIG_PCI_DOMAINS
 static inline int pci_domain_nr(struct pci_bus *bus)
 {
-	struct pci_sysdata *sd = bus->sysdata;
-	return sd->domain;
+	struct pci_controller *sd = bus->sysdata;
+
+	return sd->segment;
 }
 
 static inline int pci_proc_domain(struct pci_bus *bus)
@@ -127,7 +128,7 @@ int setup_msi_irq(struct pci_dev *dev, struct msi_desc *msidesc,
 /* Returns the node based on pci bus */
 static inline int __pcibus_to_node(const struct pci_bus *bus)
 {
-	const struct pci_sysdata *sd = bus->sysdata;
+	const struct pci_controller *sd = bus->sysdata;
 
 	return sd->node;
 }

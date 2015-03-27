@@ -475,7 +475,7 @@ void __init dmi_check_pciprobe(void)
 void pcibios_scan_root(int busnum)
 {
 	struct pci_bus *bus;
-	struct pci_sysdata *sd;
+	struct pci_controller *sd;
 	LIST_HEAD(resources);
 
 	sd = kzalloc(sizeof(*sd), GFP_KERNEL);
