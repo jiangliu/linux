@@ -686,6 +686,7 @@ static int msi_capability_init(struct pci_dev *dev, int nvec)
 	msi_set_enable(dev, 1);
 	dev->msi_enabled = 1;
 
+	pcibios_free_irq(dev);
 	dev->irq = entry->irq;
 	return 0;
 }
@@ -813,8 +814,9 @@ static int msix_capability_init(struct pci_dev *dev,
 	/* Set MSI-X enabled bits and unmask the function */
 	pci_intx_for_msi(dev, 0);
 	dev->msix_enabled = 1;
-
 	msix_clear_and_set_ctrl(dev, PCI_MSIX_FLAGS_MASKALL, 0);
+
+	pcibios_free_irq(dev);
 
 	return 0;
 
@@ -930,6 +932,7 @@ void pci_msi_shutdown(struct pci_dev *dev)
 
 	/* Restore dev->irq to its default pin-assertion irq */
 	dev->irq = desc->msi_attrib.default_irq;
+	pcibios_alloc_irq(dev);
 }
 
 void pci_disable_msi(struct pci_dev *dev)
@@ -1030,6 +1033,7 @@ void pci_msix_shutdown(struct pci_dev *dev)
 	msix_clear_and_set_ctrl(dev, PCI_MSIX_FLAGS_ENABLE, 0);
 	pci_intx_for_msi(dev, 1);
 	dev->msix_enabled = 0;
+	pcibios_alloc_irq(dev);
 }
 
 void pci_disable_msix(struct pci_dev *dev)
