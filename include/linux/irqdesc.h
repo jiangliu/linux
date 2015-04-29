@@ -177,15 +177,14 @@ static inline void __irq_set_handler_locked(unsigned int irq,
 
 /* caller has locked the irq_desc and both params are valid */
 static inline void
-__irq_set_chip_handler_name_locked(unsigned int irq, struct irq_chip *chip,
+__irq_set_chip_handler_name_locked(struct irq_data *data, struct irq_chip *chip,
 				   irq_flow_handler_t handler, const char *name)
 {
-	struct irq_desc *desc;
+	struct irq_desc *desc = irq_data_to_desc(data);
 
-	desc = irq_to_desc(irq);
-	irq_desc_get_irq_data(desc)->chip = chip;
 	desc->handle_irq = handler;
 	desc->name = name;
+	data->chip = chip;
 }
 
 static inline int irq_balancing_disabled(unsigned int irq)
