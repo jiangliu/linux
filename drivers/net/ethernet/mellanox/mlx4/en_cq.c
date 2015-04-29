@@ -31,6 +31,7 @@
  *
  */
 
+#include <linux/irq.h>
 #include <linux/mlx4/cq.h>
 #include <linux/mlx4/qp.h>
 #include <linux/mlx4/cmd.h>
@@ -135,9 +136,8 @@ int mlx4_en_activate_cq(struct mlx4_en_priv *priv, struct mlx4_en_cq *cq,
 				mdev->dev->caps.num_comp_vectors;
 		}
 
-		cq->irq_desc =
-			irq_to_desc(mlx4_eq_get_irq(mdev->dev,
-						    cq->vector));
+		cq->irq_affinity = irq_get_affinity_mask(
+					mlx4_eq_get_irq(mdev->dev, cq->vector));
 	} else {
 		/* For TX we use the same irq per
 		ring we assigned for the RX    */
