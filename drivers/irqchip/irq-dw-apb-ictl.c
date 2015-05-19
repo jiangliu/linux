@@ -28,8 +28,8 @@
 
 static void dw_apb_ictl_handler(unsigned int irq, struct irq_desc *desc)
 {
-	struct irq_chip *chip = irq_get_chip(irq);
-	struct irq_chip_generic *gc = irq_get_handler_data(irq);
+	struct irq_chip *chip = irq_desc_get_chip(desc);
+	struct irq_chip_generic *gc = irq_desc_get_handler_data(desc);
 	struct irq_domain *d = gc->private;
 	u32 stat;
 	int n;
