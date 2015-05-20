@@ -697,14 +697,14 @@ static void octeon_irq_ciu_gpio_ack(struct irq_data *data)
 	cvmx_write_csr(CVMX_GPIO_INT_CLR, mask);
 }
 
-static void octeon_irq_handle_trigger(unsigned int irq, struct irq_desc *desc)
+static void octeon_irq_handle_trigger(struct irq_desc *desc)
 {
 	struct irq_data *data = irq_desc_get_irq_data(desc);
 
 	if (irqd_get_trigger_type(data) & IRQ_TYPE_EDGE_BOTH)
-		handle_edge_irq(irq, desc);
+		handle_edge_irq(desc);
 	else
-		handle_level_irq(irq, desc);
+		handle_level_irq(desc);
 }
 
 #ifdef CONFIG_SMP
@@ -2221,7 +2221,7 @@ static irqreturn_t octeon_irq_cib_handler(int my_irq, void *data)
 			if (irqd_get_trigger_type(irq_data) &
 				IRQ_TYPE_EDGE_BOTH)
 				cvmx_write_csr(host_data->raw_reg, 1ull << i);
-			generic_handle_irq_desc(irq, desc);
+			generic_handle_irq_desc(desc);
 		}
 	}
 
