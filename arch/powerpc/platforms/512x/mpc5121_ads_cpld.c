@@ -105,7 +105,7 @@ cpld_pic_get_irq(int offset, u8 ignore, u8 __iomem *statusp,
 }
 
 static void
-cpld_pic_cascade(unsigned int __irq, struct irq_desc *desc)
+cpld_pic_cascade(struct irq_desc *desc)
 {
 	unsigned int irq;
 
