@@ -327,7 +327,7 @@ static struct irq_chip gpio_irqchip = {
 };
 
 static void
-gpio_irq_handler(unsigned __irq, struct irq_desc *desc)
+gpio_irq_handler(struct irq_desc *desc)
 {
 	unsigned int irq = irq_desc_get_irq(desc);
 	struct davinci_gpio_regs __iomem *g;

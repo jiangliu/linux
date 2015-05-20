@@ -173,7 +173,7 @@ static struct irq_domain *sa1100_gpio_irqdomain;
  * and call the handler.
  */
 static void
-sa1100_gpio_handler(unsigned int __irq, struct irq_desc *desc)
+sa1100_gpio_handler(struct irq_desc *desc)
 {
 	unsigned int mask;
 
