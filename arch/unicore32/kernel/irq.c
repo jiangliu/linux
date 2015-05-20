@@ -113,7 +113,7 @@ static struct irq_chip puv3_low_gpio_chip = {
  * and call the handler.
  */
 static void
-puv3_gpio_handler(unsigned int __irq, struct irq_desc *desc)
+puv3_gpio_handler(struct irq_desc *desc)
 {
 	unsigned int mask;
 
