@@ -436,7 +436,6 @@ static int meta_intc_irq_set_type(struct irq_data *data, unsigned int flow_type)
 
 /**
  * meta_intc_irq_demux() - external irq de-multiplexer
- * @irq:	the virtual interrupt number
  * @desc:	the interrupt description structure for this irq
  *
  * The cpu receives an interrupt on TR2 when a SoC interrupt has occurred. It is
@@ -446,7 +445,7 @@ static int meta_intc_irq_set_type(struct irq_data *data, unsigned int flow_type)
  * Whilst using TR2 to detect external interrupts is a software convention it is
  * (hopefully) unlikely to change.
  */
-static void meta_intc_irq_demux(unsigned int irq, struct irq_desc *desc)
+static void meta_intc_irq_demux(struct irq_desc *desc)
 {
 	struct meta_intc_priv *priv = &meta_intc_priv;
 	irq_hw_number_t hw;
