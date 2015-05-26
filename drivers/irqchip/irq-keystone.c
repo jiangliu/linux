@@ -90,7 +90,7 @@ static void keystone_irq_handler(unsigned irq, struct irq_desc *desc)
 	unsigned long pending;
 	int src, virq;
 
-	dev_dbg(kirq->dev, "start irq %d\n", irq);
+	dev_dbg(kirq->dev, "start irq %d\n", irq_desc_get_irq(desc));
 
 	chained_irq_enter(irq_desc_get_chip(desc), desc);
 
@@ -117,7 +117,7 @@ static void keystone_irq_handler(unsigned irq, struct irq_desc *desc)
 
 	chained_irq_exit(irq_desc_get_chip(desc), desc);
 
-	dev_dbg(kirq->dev, "end irq %d\n", irq);
+	dev_dbg(kirq->dev, "end irq %d\n", irq_desc_get_irq(desc));
 }
 
 static int keystone_irq_map(struct irq_domain *h, unsigned int virq,

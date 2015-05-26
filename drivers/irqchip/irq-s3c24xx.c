@@ -327,8 +327,8 @@ static void s3c_irq_demux(unsigned int irq, struct irq_desc *desc)
 	while (src) {
 		n = __ffs(src);
 		src &= ~(1 << n);
-		irq = irq_find_mapping(sub_intc->domain, offset + n);
-		generic_handle_irq(irq);
+		generic_handle_irq(irq_find_mapping(sub_intc->domain,
+						    offset + n));
 	}
 
 	chained_irq_exit(chip, desc);
