@@ -286,10 +286,8 @@ static void viper_irq_handler(unsigned int irq, struct irq_desc *desc)
 		 * so ack the interrupt by hand */
 		desc->irq_data.chip->irq_ack(&desc->irq_data);
 
-		if (likely(pending)) {
-			irq = viper_bit_to_irq(__ffs(pending));
-			generic_handle_irq(irq);
-		}
+		if (likely(pending))
+			generic_handle_irq(viper_bit_to_irq(__ffs(pending)));
 		pending = viper_irq_pending();
 	} while (pending);
 }

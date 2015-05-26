@@ -510,8 +510,7 @@ static void balloon3_irq_handler(unsigned int irq, struct irq_desc *desc)
 		}
 
 		while (pending) {
-			irq = BALLOON3_IRQ(0) + __ffs(pending);
-			generic_handle_irq(irq);
+			generic_handle_irq(BALLOON3_IRQ(0) + __ffs(pending));
 			pending &= pending - 1;
 		}
 		pending = __raw_readl(BALLOON3_INT_CONTROL_REG) &

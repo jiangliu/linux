@@ -151,12 +151,9 @@ static void locomo_handler(unsigned int irq, struct irq_desc *desc)
 
 	if (req) {
 		/* generate the next interrupt(s) */
-		irq = lchip->irq_base;
-		for (i = 0; i <= 3; i++, irq++) {
-			if (req & (0x0100 << i)) {
-				generic_handle_irq(irq);
-			}
-
+		for (i = 0; i <= 3; i++) {
+			if (req & (0x0100 << i))
+				generic_handle_irq(lchip->irq_base + i);
 		}
 	}
 }
