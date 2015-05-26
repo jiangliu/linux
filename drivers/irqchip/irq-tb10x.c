@@ -101,7 +101,7 @@ static void tb10x_irq_cascade(unsigned int irq, struct irq_desc *desc)
 {
 	struct irq_domain *domain = irq_desc_get_handler_data(desc);
 
-	generic_handle_irq(irq_find_mapping(domain, irq));
+	generic_handle_irq(irq_find_mapping(domain, irq_desc_get_irq(desc)));
 }
 
 static int __init of_tb10x_init_irq(struct device_node *ictl,

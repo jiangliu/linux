@@ -51,7 +51,7 @@ struct brcmstb_l2_intc_data {
 	u32 saved_mask; /* for suspend/resume */
 };
 
-static void brcmstb_l2_intc_irq_handle(unsigned int irq, struct irq_desc *desc)
+static void brcmstb_l2_intc_irq_handle(unsigned int __irq, struct irq_desc *desc)
 {
 	struct brcmstb_l2_intc_data *b = irq_desc_get_handler_data(desc);
 	struct irq_chip_generic *gc = irq_get_domain_generic_chip(b->domain, 0);
@@ -65,13 +65,14 @@ static void brcmstb_l2_intc_irq_handle(unsigned int irq, struct irq_desc *desc)
 
 	if (status == 0) {
 		raw_spin_lock(&desc->lock);
-		handle_bad_irq(irq, desc);
+		handle_bad_irq(__irq, desc);
 		raw_spin_unlock(&desc->lock);
 		goto out;
 	}
 
 	do {
-		irq = ffs(status) - 1;
+		unsigned int irq = ffs(status) - 1;
+
 		/* ack at our level */
 		irq_reg_writel(gc, 1 << irq, CPU_CLEAR);
 		status &= ~(1 << irq);
