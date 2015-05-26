@@ -830,7 +830,7 @@ void bfin_demux_gpio_irq(unsigned int inta_irq,
 {
 	unsigned int irq;
 
-	switch (inta_irq) {
+	switch (irq_desc_get_irq(desc)) {
 #if defined(BF537_FAMILY)
 	case IRQ_PF_INTA_PG_INTA:
 		bfin_demux_gpio_block(IRQ_PF0);
