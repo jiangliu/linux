@@ -107,12 +107,9 @@ static void megamod_irq_cascade(unsigned int irq, struct irq_desc *desc)
 
 	while ((events = soc_readl(&pic->regs->mevtflag[idx])) != 0) {
 		n = __ffs(events);
-
-		irq = irq_linear_revmap(pic->irqhost, idx * 32 + n);
-
 		soc_writel(1 << n, &pic->regs->evtclr[idx]);
-
-		generic_handle_irq(irq);
+		generic_handle_irq(irq_linear_revmap(pic->irqhost,
+						     idx * 32 + n));
 	}
 }
 
