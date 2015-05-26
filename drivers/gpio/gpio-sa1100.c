@@ -173,19 +173,20 @@ static struct irq_domain *sa1100_gpio_irqdomain;
  * and call the handler.
  */
 static void
-sa1100_gpio_handler(unsigned int irq, struct irq_desc *desc)
+sa1100_gpio_handler(unsigned int __irq, struct irq_desc *desc)
 {
 	unsigned int mask;
 
 	mask = GEDR;
 	do {
+		unsigned int irq = IRQ_GPIO0;
+
 		/*
 		 * clear down all currently active IRQ sources.
 		 * We will be processing them all.
 		 */
 		GEDR = mask;
 
-		irq = IRQ_GPIO0;
 		do {
 			if (mask & 1)
 				generic_handle_irq(irq);
