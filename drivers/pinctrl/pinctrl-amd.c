@@ -492,7 +492,7 @@ static struct irq_chip amd_gpio_irqchip = {
 	.irq_set_type = amd_gpio_irq_set_type,
 };
 
-static void amd_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
+static void amd_gpio_irq_handler(unsigned int __irq, struct irq_desc *desc)
 {
 	u32 i;
 	u32 off;
@@ -527,6 +527,8 @@ static void amd_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
 						(off * 4 + i) * 4);
 				if ((pin_reg & BIT(INTERRUPT_STS_OFF)) ||
 					(pin_reg & BIT(WAKE_STS_OFF))) {
+					unsigned int irq;
+
 					irq = irq_find_mapping(gc->irqdomain,
 								off * 4 + i);
 					generic_handle_irq(irq);
@@ -540,7 +542,7 @@ static void amd_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
 	}
 
 	if (handled == 0)
-		handle_bad_irq(irq, desc);
+		handle_bad_irq(__irq, desc);
 
 	spin_lock_irqsave(&gpio_dev->lock, flags);
 	reg = readl(gpio_dev->base + WAKE_INT_MASTER_REG);
