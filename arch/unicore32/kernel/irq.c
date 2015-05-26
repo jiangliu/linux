@@ -113,19 +113,20 @@ static struct irq_chip puv3_low_gpio_chip = {
  * and call the handler.
  */
 static void
-puv3_gpio_handler(unsigned int irq, struct irq_desc *desc)
+puv3_gpio_handler(unsigned int __irq, struct irq_desc *desc)
 {
 	unsigned int mask;
 
 	mask = readl(GPIO_GEDR);
 	do {
+		unsigned int irq = IRQ_GPIO0;
+
 		/*
 		 * clear down all currently active IRQ sources.
 		 * We will be processing them all.
 		 */
 		writel(mask, GPIO_GEDR);
 
-		irq = IRQ_GPIO0;
 		do {
 			if (mask & 1)
 				generic_handle_irq(irq);
