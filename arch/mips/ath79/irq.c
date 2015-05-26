@@ -120,8 +120,9 @@ static void __init ath79_misc_irq_init(void)
 	irq_set_chained_handler(ATH79_CPU_IRQ(6), ath79_misc_irq_handler);
 }
 
-static void ar934x_ip2_irq_dispatch(unsigned int irq, struct irq_desc *desc)
+static void ar934x_ip2_irq_dispatch(unsigned int __irq, struct irq_desc *desc)
 {
+	unsigned int irq = irq_desc_get_irq(desc);
 	u32 status;
 
 	disable_irq_nosync(irq);
@@ -153,8 +154,9 @@ static void ar934x_ip2_irq_init(void)
 	irq_set_chained_handler(ATH79_CPU_IRQ(2), ar934x_ip2_irq_dispatch);
 }
 
-static void qca955x_ip2_irq_dispatch(unsigned int irq, struct irq_desc *desc)
+static void qca955x_ip2_irq_dispatch(unsigned int __irq, struct irq_desc *desc)
 {
+	unsigned int irq = irq_desc_get_irq(desc);
 	u32 status;
 
 	disable_irq_nosync(irq);
@@ -181,8 +183,9 @@ enable:
 	enable_irq(irq);
 }
 
-static void qca955x_ip3_irq_dispatch(unsigned int irq, struct irq_desc *desc)
+static void qca955x_ip3_irq_dispatch(unsigned int __irq, struct irq_desc *desc)
 {
+	unsigned int irq = irq_desc_get_irq(desc);
 	u32 status;
 
 	disable_irq_nosync(irq);
