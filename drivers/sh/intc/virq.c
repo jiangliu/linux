@@ -114,7 +114,7 @@ static void intc_virq_handler(unsigned int irq, struct irq_desc *desc)
 	struct irq_data *data = irq_desc_get_irq_data(desc);
 	struct irq_chip *chip = irq_data_get_irq_chip(data);
 	struct intc_virq_list *entry, *vlist = irq_data_get_irq_handler_data(data);
-	struct intc_desc_int *d = get_intc_desc(irq);
+	struct intc_desc_int *d = get_intc_desc(irq_desc_get_irq(desc));
 
 	chip->irq_mask_ack(data);
 
