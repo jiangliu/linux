@@ -56,7 +56,7 @@ EXPORT_SYMBOL(__ipipe_irq_lvmask);
 
 static void __ipipe_ack_irq(unsigned irq, struct irq_desc *desc)
 {
-	desc->ipipe_ack(irq, desc);
+	desc->ipipe_ack(irq_desc_get_irq(desc), desc);
 }
 
 /*
