@@ -100,7 +100,7 @@ void socrates_fpga_pic_cascade(unsigned int irq, struct irq_desc *desc)
 	 * See if we actually have an interrupt, call generic handling code if
 	 * we do.
 	 */
-	cascade_irq = socrates_fpga_pic_get_irq(irq);
+	cascade_irq = socrates_fpga_pic_get_irq(irq_desc_get_irq(desc));
 
 	if (cascade_irq != NO_IRQ)
 		generic_handle_irq(cascade_irq);
