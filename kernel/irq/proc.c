@@ -301,13 +301,12 @@ static int name_unique(unsigned int irq, struct irqaction *new_action)
 	return ret;
 }
 
-void register_handler_proc(unsigned int irq, struct irqaction *action)
+void register_handler_proc(struct irq_desc *desc, struct irqaction *action)
 {
 	char name [MAX_NAMELEN];
-	struct irq_desc *desc = irq_to_desc(irq);
 
 	if (!desc->dir || action->dir || !action->name ||
-					!name_unique(irq, action))
+	    !name_unique(irq_desc_get_irq(desc), action))
 		return;
 
 	memset(name, 0, MAX_NAMELEN);
@@ -321,9 +320,10 @@ void register_handler_proc(unsigned int irq, struct irqaction *action)
 
 #define MAX_NAMELEN 10
 
-void register_irq_proc(unsigned int irq, struct irq_desc *desc)
+void register_irq_proc(struct irq_desc *desc)
 {
 	char name [MAX_NAMELEN];
+	unsigned int irq = irq_desc_get_irq(desc);
 
 	if (!root_irq_dir || (desc->irq_data.chip == &no_irq_chip) || desc->dir)
 		return;
@@ -357,7 +357,7 @@ void register_irq_proc(unsigned int irq, struct irq_desc *desc)
 			 &irq_spurious_proc_fops, (void *)(long)irq);
 }
 
-void unregister_irq_proc(unsigned int irq, struct irq_desc *desc)
+void unregister_irq_proc(struct irq_desc *desc)
 {
 	char name [MAX_NAMELEN];
 
@@ -372,13 +372,13 @@ void unregister_irq_proc(unsigned int irq, struct irq_desc *desc)
 	remove_proc_entry("spurious", desc->dir);
 
 	memset(name, 0, MAX_NAMELEN);
-	sprintf(name, "%u", irq);
+	sprintf(name, "%u", irq_desc_get_irq(desc));
 	remove_proc_entry(name, root_irq_dir);
 }
 
 #undef MAX_NAMELEN
 
-void unregister_handler_proc(unsigned int irq, struct irqaction *action)
+void unregister_handler_proc(struct irq_desc *desc, struct irqaction *action)
 {
 	proc_remove(action->dir);
 }
@@ -410,7 +410,7 @@ void init_irq_proc(void)
 		if (!desc)
 			continue;
 
-		register_irq_proc(irq, desc);
+		register_irq_proc(desc);
 	}
 }
 

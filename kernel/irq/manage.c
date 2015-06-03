@@ -1293,9 +1293,9 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 	if (new->thread)
 		wake_up_process(new->thread);
 
-	register_irq_proc(irq, desc);
+	register_irq_proc(desc);
 	new->dir = NULL;
-	register_handler_proc(irq, new);
+	register_handler_proc(desc, new);
 	free_cpumask_var(mask);
 
 	return 0;
@@ -1405,7 +1405,7 @@ static struct irqaction *__free_irq(unsigned int irq, void *dev_id)
 
 	raw_spin_unlock_irqrestore(&desc->lock, flags);
 
-	unregister_handler_proc(irq, action);
+	unregister_handler_proc(desc, action);
 
 	/* Make sure it's not being used on another CPU: */
 	synchronize_irq(irq);
@@ -1712,7 +1712,7 @@ static struct irqaction *__free_percpu_irq(unsigned int irq, void __percpu *dev_
 
 	raw_spin_unlock_irqrestore(&desc->lock, flags);
 
-	unregister_handler_proc(irq, action);
+	unregister_handler_proc(desc, action);
 
 	module_put(desc->owner);
 	return action;
