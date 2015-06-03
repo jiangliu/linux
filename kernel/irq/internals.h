@@ -59,10 +59,9 @@ enum {
 #include "debug.h"
 #include "settings.h"
 
-extern int __irq_set_trigger(struct irq_desc *desc, unsigned int irq,
-		unsigned long flags);
-extern void __disable_irq(struct irq_desc *desc, unsigned int irq);
-extern void __enable_irq(struct irq_desc *desc, unsigned int irq);
+extern int __irq_set_trigger(struct irq_desc *desc, unsigned long flags);
+extern void __disable_irq(struct irq_desc *desc);
+extern void __enable_irq(struct irq_desc *desc);
 
 extern int irq_startup(struct irq_desc *desc, bool resend);
 extern void irq_shutdown(struct irq_desc *desc);
