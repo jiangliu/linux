@@ -175,7 +175,7 @@ static void free_desc(unsigned int irq)
 {
 	struct irq_desc *desc = irq_to_desc(irq);
 
-	unregister_irq_proc(irq, desc);
+	unregister_irq_proc(desc);
 
 	/*
 	 * sparse_irq_lock protects also show_interrupts() and
