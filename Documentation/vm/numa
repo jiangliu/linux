@@ -50,13 +50,13 @@ CPUs, memory and/or IO buses.  And, again, memory accesses to memory on
 faster access times and higher effective bandwidth than accesses to more
 remote cells.
 
-For some architectures, such as x86, Linux will "hide" any node representing a
-physical cell that has no memory attached, and reassign any CPUs attached to
+For some architectures, Linux will "hide" any node representing a physical
+cell that has no memory attached, and reassign any CPUs attached to
 that cell to a node representing a cell that does have memory.  Thus, on
 these architectures, one cannot assume that all CPUs that Linux associates with
 a given node will see the same local memory access times and bandwidth.
 
-In addition, for some architectures, again x86 is an example, Linux supports
+In addition, for some architectures, x86 is an example, Linux supports
 the emulation of additional nodes.  For NUMA emulation, linux will carve up
 the existing nodes--or the system memory for non-NUMA platforms--into multiple
 nodes.  Each emulated node will manage a fraction of the underlying cells'
