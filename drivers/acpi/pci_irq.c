@@ -439,12 +439,12 @@ int acpi_pci_irq_enable(struct pci_dev *dev)
 	 * driver reported one, then use it. Exit in any case.
 	 */
 	if (gsi < 0) {
-		if (acpi_isa_register_gsi(dev))
+		rc = acpi_isa_register_gsi(dev);
+		if (rc < 0)
 			dev_warn(&dev->dev, "PCI INT %c: no GSI\n",
 				 pin_name(pin));
-
 		kfree(entry);
-		return 0;
+		return rc;
 	}
 
 	rc = acpi_register_gsi(&dev->dev, gsi, triggering, polarity);
