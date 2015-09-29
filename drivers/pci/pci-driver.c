@@ -404,6 +404,7 @@ static int pci_device_probe(struct device *dev)
 	struct pci_driver *drv = to_pci_driver(dev->driver);
 
 	error = pcibios_alloc_irq(pci_dev);
+	dev_warn(dev, "irqdomain: probe irq ret%d\n", error);
 	if (error < 0)
 		return error;
 
