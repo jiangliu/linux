@@ -674,17 +674,21 @@ int pcibios_add_device(struct pci_dev *dev)
 
 int pcibios_alloc_irq(struct pci_dev *dev)
 {
-	return pcibios_enable_irq(dev);
+	int ret = pcibios_enable_irq(dev);
+	dev_warn(&dev->dev, "irqdomain: allocate irq%d\n", dev->irq);
+	return ret;
 }
 
 void pcibios_free_irq(struct pci_dev *dev)
 {
+	dev_warn(&dev->dev, "irqdomain: free irq%d\n", dev->irq);
 	if (pcibios_disable_irq)
 		pcibios_disable_irq(dev);
 }
 
 int pcibios_enable_device(struct pci_dev *dev, int mask)
 {
+	dev_warn(&dev->dev, "irqdomain: enable device irq%d\n", dev->irq);
 	return pci_enable_resources(dev, mask);
 }
 

@@ -15,6 +15,7 @@
 #include <linux/sched.h>
 #include <linux/interrupt.h>
 #include <linux/kernel_stat.h>
+#include <linux/ratelimit.h>
 
 #include <trace/events/irq.h>
 
@@ -136,6 +137,7 @@ handle_irq_event_percpu(struct irq_desc *desc, struct irqaction *action)
 	irqreturn_t retval = IRQ_NONE;
 	unsigned int flags = 0, irq = desc->irq_data.irq;
 
+	printk_ratelimited("irqdomain: irq%d %pS\n", irq_desc_get_irq(desc), action->handler);
 	do {
 		irqreturn_t res;
 
