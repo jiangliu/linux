@@ -681,6 +681,7 @@ int pcibios_alloc_irq(struct pci_dev *dev)
 
 void pcibios_free_irq(struct pci_dev *dev)
 {
+	dev_warn(&dev->dev, "irqdomain: free irq%d\n", dev->irq);
 	if (pcibios_disable_irq)
 		pcibios_disable_irq(dev);
 }

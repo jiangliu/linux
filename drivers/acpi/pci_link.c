@@ -552,6 +552,7 @@ static int acpi_pci_link_allocate(struct acpi_pci_link *link)
 				irq = link->irq.possible[i];
 		}
 	}
+#if 0
 	if (acpi_irq_penalty[irq] >= PIRQ_PENALTY_ISA_ALWAYS) {
 		printk(KERN_ERR PREFIX "No IRQ available for %s [%s]. "
 			    "Try pci=noacpi or acpi=off\n",
@@ -559,6 +560,7 @@ static int acpi_pci_link_allocate(struct acpi_pci_link *link)
 			    acpi_device_bid(link->device));
 		return -ENODEV;
 	}
+#endif
 
 	/* Attempt to enable the link device at this IRQ. */
 	if (acpi_pci_link_set(link, irq)) {
@@ -829,8 +831,11 @@ void acpi_penalize_isa_irq(int irq, int active)
 
 bool acpi_isa_irq_available(int irq)
 {
+	return true;
+#if 0
 	return irq >= 0 && (irq >= ARRAY_SIZE(acpi_irq_penalty) ||
 			    acpi_irq_penalty[irq] < PIRQ_PENALTY_ISA_ALWAYS);
+#endif
 }
 
 /*
