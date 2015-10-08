@@ -162,12 +162,14 @@ done:
 	list_add(&ioapic->list, &ioapic_list);
 	mutex_unlock(&ioapic_list_lock);
 
-	if (dev)
+	if (dev) {
+		dev->match_driver = false;
 		dev_info(&dev->dev, "%s at %pR, GSI %u\n",
 			 type, res, (u32)gsi_base);
-	else
+	} else {
 		acpi_handle_info(handle, "%s at %pR, GSI %u\n",
 				 type, res, (u32)gsi_base);
+	}
 
 	return AE_OK;
 
@@ -216,6 +218,7 @@ int acpi_ioapic_remove(struct acpi_pci_root *root)
 		if (ioapic->pdev) {
 			pci_release_region(ioapic->pdev, 0);
 			pci_disable_device(ioapic->pdev);
+			ioapic->pdev->match_driver = true;
 			pci_dev_put(ioapic->pdev);
 		} else if (ioapic->res.flags && ioapic->res.parent) {
 			release_resource(&ioapic->res);
