@@ -700,7 +700,7 @@ static __init int find_near_online_node(int node)
 {
 	int n, val;
 	int min_val = INT_MAX;
-	int best_node = -1;
+	int best_node = NUMA_NO_NODE;
 
 	for_each_online_node(n) {
 		val = node_distance(node, n);
