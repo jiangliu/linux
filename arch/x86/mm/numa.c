@@ -696,15 +696,22 @@ void __init x86_numa_init(void)
 	numa_init(dummy_numa_init);
 }
 
-static __init int find_near_online_node(int node)
+bool node_has_memory(int node)
+{
+	return node != NUMA_NO_NODE && node_online(node) &&
+	       node_present_pages(node);
+}
+
+int find_fallback_mem_node(int node)
 {
 	int n, val;
 	int min_val = INT_MAX;
 	int best_node = NUMA_NO_NODE;
 
 	for_each_online_node(n) {
+		if (!node_has_memory(n))
+			continue;
 		val = node_distance(node, n);
-
 		if (val < min_val) {
 			min_val = val;
 			best_node = n;
@@ -731,17 +738,15 @@ static __init int find_near_online_node(int node)
 void __init init_cpu_to_node(void)
 {
 	int cpu;
-	u16 *cpu_to_apicid = early_per_cpu_ptr(x86_cpu_to_apicid);
 
-	BUG_ON(cpu_to_apicid == NULL);
-
+	BUG_ON(early_per_cpu_ptr(x86_cpu_to_apicid) == NULL);
 	for_each_possible_cpu(cpu) {
 		int node = numa_cpu_node(cpu);
 
 		if (node == NUMA_NO_NODE)
 			continue;
-		if (!node_online(node))
-			node = find_near_online_node(node);
+		if (!node_has_memory(node))
+			node = find_fallback_mem_node(node);
 		numa_set_node(cpu, node);
 	}
 }

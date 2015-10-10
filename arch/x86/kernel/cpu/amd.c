@@ -272,18 +272,18 @@ static void init_amd_k7(struct cpuinfo_x86 *c)
  * To workaround broken NUMA config.  Read the comment in
  * srat_detect_node().
  */
-static int nearby_node(int apicid)
+static int find_mem_node_for_cpu(int apicid)
 {
 	int i, node;
 
 	for (i = apicid - 1; i >= 0; i--) {
 		node = __apicid_to_node[i];
-		if (node != NUMA_NO_NODE && node_online(node))
+		if (node_has_memory(node))
 			return node;
 	}
 	for (i = apicid + 1; i < MAX_LOCAL_APIC; i++) {
 		node = __apicid_to_node[i];
-		if (node != NUMA_NO_NODE && node_online(node))
+		if (node_has_memory(node))
 			return node;
 	}
 	return first_node(node_online_map); /* Shouldn't happen */
@@ -399,7 +399,7 @@ static void srat_detect_node(struct cpuinfo_x86 *c)
 	if (x86_cpuinit.fixup_cpu_id)
 		x86_cpuinit.fixup_cpu_id(c, node);
 
-	if (!node_online(node)) {
+	if (!node_has_memory(node)) {
 		/*
 		 * Two possibilities here:
 		 *
@@ -424,9 +424,9 @@ static void srat_detect_node(struct cpuinfo_x86 *c)
 		if (ht_nodeid >= 0 &&
 		    __apicid_to_node[ht_nodeid] != NUMA_NO_NODE)
 			node = __apicid_to_node[ht_nodeid];
-		/* Pick a nearby node */
-		if (!node_online(node))
-			node = nearby_node(apicid);
+		/* Pick a nearby node with memory */
+		if (!node_has_memory(node))
+			node = find_mem_node_for_cpu(apicid);
 	}
 	numa_set_node(cpu, node);
 #endif

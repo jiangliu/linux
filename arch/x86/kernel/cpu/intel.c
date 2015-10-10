@@ -307,7 +307,7 @@ static void srat_detect_node(struct cpuinfo_x86 *c)
 	/* Don't do the funky fallback heuristics the AMD version employs
 	   for now. */
 	node = numa_cpu_node(cpu);
-	if (node == NUMA_NO_NODE || !node_online(node)) {
+	if (!node_has_memory(node)) {
 		/* reuse the value from init_cpu_to_node() */
 		node = cpu_to_node(cpu);
 	}

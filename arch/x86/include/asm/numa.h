@@ -32,6 +32,8 @@ extern nodemask_t numa_nodes_parsed __initdata;
 
 extern int __init numa_add_memblk(int nodeid, u64 start, u64 end);
 extern void __init numa_set_distance(int from, int to, int distance);
+extern bool node_has_memory(int node);
+extern int find_fallback_mem_node(int node);
 
 static inline void set_apicid_to_node(int apicid, s16 node)
 {
